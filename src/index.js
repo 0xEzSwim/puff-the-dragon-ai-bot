@@ -11,7 +11,7 @@ const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
 const CHANNEL_PREFIX = '!';
 const PRIVATE_PREFIX = '?';
 const DEFAULT_ANSWER = `I only talk to dragons who start their sentences with a \`${CHANNEL_PREFIX}\`\nIf you're shy, you can always start your message with a \`${PRIVATE_PREFIX}\` and I'll answer you privately!`;
-const ERROR_ANSWER = "I'm here to help you with any questions you have about PUFF the dragon. How can I assist you?";
+const ERROR_ANSWER = "I'm the super cool and helpful Discord assistant for the PUFF community, here to keep you updated and answering all your questions about our awesome meme coin 2.0 on the Mantle blockchain! Ready to blow some smoke and fire your way with answers! 🐉 Let's have some fun while we're at it! 💨🔥";
 //#endregion
 
 //#region CLIENTS
@@ -112,7 +112,7 @@ client.on('messageCreate', async (message) => {
         console.log(`${openAiReply.role} > ${openAiReply.content[0].text.value}`);
         await discordSend(message, openAiReply.content[0].text.value, isDm);
     } else if (openAiRun.status === 'failed') {
-        const failedReply = `I could not understant what you meant by "${userMessageContent}"\n${ERROR_ANSWER}`;
+        const failedReply = `I didn't catch what you meant by "${userMessageContent}"\n${ERROR_ANSWER}`;
         console.log(`puff > ${failedReply}`);
         discordSend(message, failedReply, isDm);
     } else {
