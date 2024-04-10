@@ -51,6 +51,8 @@ client.on('messageCreate', async (message) => {
         return;
     }
     if (message.content[0] != CHANNEL_PREFIX && message.content[0] != PRIVATE_PREFIX) {
+        await message.channel.send(`I only talk to dragons who start their sentences with a \`${CHANNEL_PREFIX}\`\nIf you're shy, you can always start your message with a \`${PRIVATE_PREFIX}\` and I'll answer you privately!`);
+        console.log(`message #${message.id} is missing the prefix`);
         return;
     }
 
