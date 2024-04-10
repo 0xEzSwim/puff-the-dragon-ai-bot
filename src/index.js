@@ -76,8 +76,7 @@ client.on('messageCreate', async (message) => {
     let run = await openai.beta.threads.runs.createAndPoll(
         thread.id,
         { 
-            assistant_id: OPEN_AI_ASSISTANT_ID,
-            instructions: "Please address the user as Jane Doe. The user has a premium account."
+            assistant_id: OPEN_AI_ASSISTANT_ID
         }
     );
 
