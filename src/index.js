@@ -6,7 +6,7 @@ import { OpenAI } from "openai";
 const OPEN_AI_API_KEY = process.env.OPEN_AI_API_KEY;
 const OPEN_AI_ASSISTANT_ID = process.env.OPEN_AI_ASSISTANT_ID;
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-const DISCORD_CHANNEL_ID = process.env.DISCORD__CHANNEL_ID;
+const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
 const CHANNEL_PREFIX = '!';
 const PRIVATE_PREFIX = '?';
 //#endregion
