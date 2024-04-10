@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv/config.js";
-import { Client } from "discord.js";
+import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { OpenAI } from "openai"; 
 
 //#region GLOBAL VARIABLES
@@ -9,6 +9,8 @@ const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
 const CHANNEL_PREFIX = '!';
 const PRIVATE_PREFIX = '?';
+const DEFAULT_ANSWER = `I only talk to dragons who start their sentences with a \`${CHANNEL_PREFIX}\`\nIf you're shy, you can always start your message with a \`${PRIVATE_PREFIX}\` and I'll answer you privately!`;
+const ERROR_ANSWER = "I'm here to help you with any questions you have about PUFF the dragon. How can I assist you?";
 //#endregion
 
 //#region CLIENTS
@@ -16,14 +18,26 @@ const openai = new OpenAI({
     apiKey: OPEN_AI_API_KEY
 });
 const client = new Client({
-    intents: ['Guilds', 'GuildMembers', 'GuildMessages', 'MessageContent'] 
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.MessageContent
+    ],
+    partials: [
+        Partials.Channel,
+        Partials.Message
+    ]
 });
 //#endregion
 
-const discordSend = async (message, reply) => {
+const getUserMessageContent = (message, isDm = true) => isDm ? message.content : message.content.substring(1);
+const discordSend = async (message, reply, isDm) => {
     // Max sized char in one discord message
     const chunkSizeLimit = 2000;
-    const isPrivate = message.content[0] == PRIVATE_PREFIX;
+    // if not Dm, message has "!" or "?" prefix
+    const isPrivate = isDm || message.content[0] == PRIVATE_PREFIX;
 
     if(isPrivate) {
         for (let i = 0; i < reply.length; i += chunkSizeLimit) {
@@ -38,38 +52,14 @@ const discordSend = async (message, reply) => {
     }
 }
 
-//#region DISCORD EVENTS
-client.on('ready', () => {
-    console.log(`${client.user} is now running and listening to channel #${DISCORD_CHANNEL_ID}!`);
-});
-
-client.on('messageCreate', async (message) => {
-    if (message.author.id == client.user.id) {
-        return;
-    }
-    if (message.channelId != +DISCORD_CHANNEL_ID) {
-        return;
-    }
-    if (message.content[0] != CHANNEL_PREFIX && message.content[0] != PRIVATE_PREFIX) {
-        await message.channel.send(`I only talk to dragons who start their sentences with a \`${CHANNEL_PREFIX}\`\nIf you're shy, you can always start your message with a \`${PRIVATE_PREFIX}\` and I'll answer you privately!`);
-        console.log(`message #${message.id} is missing the prefix`);
-        return;
-    }
-
-    console.log(`[message #${message.id}] ${message.author.username}: "${message.content.substring(1)}"`);
-
-    await message.channel.sendTyping();
-    const sendTypingInterval = setInterval(() => {
-        message.channel.sendTyping();
-    }, 5000);
-
+const askOpenAiAssistant = async (message, isDm) => {
+    const messageContent = getUserMessageContent(message, isDm);
     const thread = await openai.beta.threads.create();
-
     const userRequest = await openai.beta.threads.messages.create(
         thread.id,
         {
             role: "user",
-            content: message.content.substring(1)
+            content: messageContent
         }
     );
 
@@ -80,21 +70,55 @@ client.on('messageCreate', async (message) => {
         }
     );
 
-    clearInterval(sendTypingInterval);
+    return run;
+}
 
-    if (run.status === 'completed') {
-        const openAiMessages = await openai.beta.threads.messages.list(run.thread_id);
-        for (const openAiMessage of openAiMessages.data.reverse()) {
-            console.log(`${openAiMessage.role} > ${openAiMessage.content[0].text.value}`);
-            await discordSend(message, openAiMessage.content[0].text.value);
-        }
-    } else if (run.status === 'failed') {
-        discordSend(message, "I'm here to help you with any questions you have about PUFF the dragon. How can I assist you today?");
-    } else {
-        console.log(run.status);
+//#region DISCORD EVENTS
+client.on('ready', () => {
+    console.log(`${client.user} is now running and listening to channel #${DISCORD_CHANNEL_ID}!`);
+});
+
+client.on('messageCreate', async (message) => {
+    if (message.author.id == client.user.id) {
+        return;
+    }
+    
+    const isDm = message.guild === null;
+    if (message.channelId != +DISCORD_CHANNEL_ID && !isDm) {
+        return;
+    }
+    if (message.content[0] != CHANNEL_PREFIX && message.content[0] != PRIVATE_PREFIX && !isDm) {
+        await message.channel.send(DEFAULT_ANSWER);
+        console.log(`message #${message.id} is missing the prefix`);
+        return;
     }
 
-    console.log(`[message #${message.id}] Puff: ANSWERED\n`);
+    const userMessageContent = getUserMessageContent(message, isDm);
+    console.log(`[message #${message.id}] ${message.author.username}: "${userMessageContent}"`);
+
+    await message.channel.sendTyping();
+    const sendTypingInterval = setInterval(() => {
+        message.channel.sendTyping();
+    }, 5000);
+
+    let openAiResponse = await askOpenAiAssistant(message, isDm);
+
+    clearInterval(sendTypingInterval);
+
+    if (openAiResponse.status === 'completed') {
+        const openAiMessages = await openai.beta.threads.messages.list(openAiResponse.thread_id);
+        for (const openAiMessage of openAiMessages.data.reverse()) {
+            console.log(`${openAiMessage.role} > ${openAiMessage.content[0].text.value}`);
+            await discordSend(message, openAiMessage.content[0].text.value, isDm);
+        }
+    } else if (openAiResponse.status === 'failed') {
+        const failedReply = `I could not understant what you meant by "${userMessageContent}"\n${ERROR_ANSWER}`;
+        discordSend(message, failedReply, isDm);
+    } else {
+        console.log(openAiResponse.status);
+    }
+
+    console.log(`[message #${message.id}] ANSWERED\n`);
     
 });
 //#endregion
