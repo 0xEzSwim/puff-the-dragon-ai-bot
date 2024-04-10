@@ -3,6 +3,7 @@ import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { OpenAI } from "openai"; 
 
 //#region GLOBAL VARIABLES
+const OPEN_AI_ORGANIZATION_ID = process.env.OPEN_AI_ORGANIZATION_ID;
 const OPEN_AI_API_KEY = process.env.OPEN_AI_API_KEY;
 const OPEN_AI_ASSISTANT_ID = process.env.OPEN_AI_ASSISTANT_ID;
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
@@ -15,6 +16,7 @@ const ERROR_ANSWER = "I'm here to help you with any questions you have about PUF
 
 //#region CLIENTS
 const openai = new OpenAI({
+    organization: OPEN_AI_ORGANIZATION_ID,
     apiKey: OPEN_AI_API_KEY
 });
 const client = new Client({
@@ -53,13 +55,12 @@ const discordSend = async (message, reply, isDm) => {
 }
 
 const askOpenAiAssistant = async (message, isDm) => {
-    const messageContent = getUserMessageContent(message, isDm);
     const thread = await openai.beta.threads.create();
     const userRequest = await openai.beta.threads.messages.create(
         thread.id,
         {
             role: "user",
-            content: messageContent
+            content: getUserMessageContent(message, isDm)
         }
     );
 
@@ -82,7 +83,7 @@ client.on('messageCreate', async (message) => {
     if (message.author.id == client.user.id) {
         return;
     }
-    
+
     const isDm = message.guild === null;
     if (message.channelId != +DISCORD_CHANNEL_ID && !isDm) {
         return;
@@ -101,24 +102,24 @@ client.on('messageCreate', async (message) => {
         message.channel.sendTyping();
     }, 5000);
 
-    let openAiResponse = await askOpenAiAssistant(message, isDm);
+    let openAiRun = await askOpenAiAssistant(message, isDm);
 
     clearInterval(sendTypingInterval);
 
-    if (openAiResponse.status === 'completed') {
-        const openAiMessages = await openai.beta.threads.messages.list(openAiResponse.thread_id);
-        for (const openAiMessage of openAiMessages.data.reverse()) {
-            console.log(`${openAiMessage.role} > ${openAiMessage.content[0].text.value}`);
-            await discordSend(message, openAiMessage.content[0].text.value, isDm);
-        }
-    } else if (openAiResponse.status === 'failed') {
+    if (openAiRun.status === 'completed') {
+        const openAiMessages = await openai.beta.threads.messages.list(openAiRun.thread_id);
+        const openAiReply = openAiMessages.data[0];
+        console.log(`${openAiReply.role} > ${openAiReply.content[0].text.value}`);
+        await discordSend(message, openAiReply.content[0].text.value, isDm);
+    } else if (openAiRun.status === 'failed') {
         const failedReply = `I could not understant what you meant by "${userMessageContent}"\n${ERROR_ANSWER}`;
+        console.log(`puff > ${failedReply}`);
         discordSend(message, failedReply, isDm);
     } else {
-        console.log(openAiResponse.status);
+        console.log(openAiRun.status);
     }
 
-    console.log(`[message #${message.id}] ANSWERED\n`);
+    console.log(`DONE\n`);
     
 });
 //#endregion
