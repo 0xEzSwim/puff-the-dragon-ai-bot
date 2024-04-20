@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv/config.js";
-import { Client, GatewayIntentBits, Partials, ChannelType, EmbedBuilder, Embed } from "discord.js";
+import { Client, GatewayIntentBits, Partials, Events, ChannelType, EmbedBuilder, Embed } from "discord.js";
 import { OpenAI } from "openai"; 
 import {
     getContentFromMessage,
@@ -53,13 +53,22 @@ const discordBotReply = async (message, reply) => {
         await message.channel.send({ embeds: [discordMessageTemplate(reply)] });
     } else {
         const thread = await message.startThread({
-            name: `${message.author?.globalName ?? message.author?.username} asked "${userMsg}"`,
+            name: `${message.author?.globalName ?? message.author?.username}`,
             autoArchiveDuration: 60,
             type: ChannelType.PrivateThread,
             reason: userMsg,
         });
         // When creating a thread from message, the message id becomes the thread's channel id
         DISCORD_CHANNEL_IDS.push(message.id);
+
+        // const mainChannel = await client.channels.fetch(DISCORD_CHANNEL_IDS[0]);
+        // const thread = await mainChannel.threads.create({
+        //     name: `${message.author?.globalName ?? message.author?.username}`,
+        //     autoArchiveDuration: 60,
+        //     type: ChannelType.PrivateThread,
+        //     reason: userMsg,
+        // });
+        // DISCORD_CHANNEL_IDS.push(thread.id);
 
         await thread.send({ embeds: [discordMessageTemplate(reply)] });
     }
@@ -86,7 +95,7 @@ const askOpenAiAssistant = async (message) => {
 }
 
 //#region DISCORD EVENTS
-client.on('ready', async () => {
+client.once(Events.ClientReady, async () => {
     // Clean unactive threads
     const activeThreadIds = await getActiveAndUpdateLastOpenedThreads();
     if(activeThreadIds?.length) {
@@ -99,7 +108,8 @@ client.on('ready', async () => {
     console.log("\n");
 });
 
-client.on('messageCreate', async (message) => {
+client.on(Events.MessageCreate, async (message) => {
+    // console.log(message);
     if (message.author.id == client.user.id) {
         // Bot receives its answer
         logAndSaveMessage(message);
@@ -118,8 +128,8 @@ client.on('messageCreate', async (message) => {
     }, 5000);
 
     // Comment the ligne below and uncomment the line after thath when testing localy as to not burn all openAI credit
-    // let openAiRun = await askOpenAiAssistant(message);
-    let openAiRun = {status: 'failed'};
+    let openAiRun = await askOpenAiAssistant(message);
+    // let openAiRun = {status: 'failed'};
 
     clearInterval(sendTypingInterval);
 
