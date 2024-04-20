@@ -2,7 +2,9 @@ import * as dotenv from "dotenv/config.js";
 import { Client, GatewayIntentBits, Partials, ChannelType, EmbedBuilder, Embed } from "discord.js";
 import { OpenAI } from "openai"; 
 import {
-    logMessage
+    getContentFromMessage,
+    logAndSaveMessage,
+    getActiveAndUpdateLastOpenedThreads
 } from "./utils/index.js";
 
 //#region GLOBAL VARIABLES
@@ -10,6 +12,7 @@ const OPEN_AI_ORGANIZATION_ID = process.env.OPEN_AI_ORGANIZATION_ID;
 const OPEN_AI_API_KEY = process.env.OPEN_AI_API_KEY;
 const OPEN_AI_ASSISTANT_ID = process.env.OPEN_AI_ASSISTANT_ID;
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+// type: string array
 let DISCORD_CHANNEL_IDS = [process.env.DISCORD_CHANNEL_ID];
 const CHANNEL_PREFIX = '!';
 const PRIVATE_PREFIX = '?';
@@ -43,10 +46,8 @@ const discordMessageTemplate = (reply) => new EmbedBuilder()
 	.setDescription(reply)
 	.setTimestamp();
 //#endregion
-
-const getUserMessageContent = (message) => message.content;
 const discordBotReply = async (message, reply) => {
-    const userMsg = getUserMessageContent(message);
+    const userMsg = getContentFromMessage(message);
 
     if(message.channel.isThread()) {
         await message.channel.send({ embeds: [discordMessageTemplate(reply)] });
@@ -70,7 +71,7 @@ const askOpenAiAssistant = async (message) => {
         thread.id,
         {
             role: "user",
-            content: getUserMessageContent(message)
+            content: getContentFromMessage(message)
         }
     );
 
@@ -85,23 +86,31 @@ const askOpenAiAssistant = async (message) => {
 }
 
 //#region DISCORD EVENTS
-client.on('ready', () => {
-    console.log(`${client.user} is now running and listening to channel #${DISCORD_CHANNEL_IDS[0]}!`);
-    // We need a way to load open discord threads maybe a .json file?
-    // const thread = channel.threads.cache.filter((x) => x.id).map(x => x.id);
+client.on('ready', async () => {
+    // Clean unactive threads
+    const activeThreadIds = await getActiveAndUpdateLastOpenedThreads();
+    if(activeThreadIds?.length) {
+        DISCORD_CHANNEL_IDS.push(...activeThreadIds);
+    }
+    console.log(`${client.user} is now running and listening to channels :`);
+    DISCORD_CHANNEL_IDS.forEach(threadIds => {
+        console.log(`->  #${threadIds}`);
+    });
+    console.log("\n");
 });
 
 client.on('messageCreate', async (message) => {
     if (message.author.id == client.user.id) {
-        logMessage(message.content);
+        // Bot receives its answer
+        logAndSaveMessage(message);
         return;
     }
 
-    if (DISCORD_CHANNEL_IDS.includes(+message.channelId)) {
+    if (!DISCORD_CHANNEL_IDS.includes(message.channelId)) {
         return;
     }
 
-    logMessage(message.content);
+    logAndSaveMessage(message);
 
     await message.channel.sendTyping();
     const sendTypingInterval = setInterval(() => {
@@ -109,25 +118,21 @@ client.on('messageCreate', async (message) => {
     }, 5000);
 
     // Comment the ligne below and uncomment the line after thath when testing localy as to not burn all openAI credit
-    let openAiRun = await askOpenAiAssistant(message);
-    // let openAiRun = {status: 'failed'};
+    // let openAiRun = await askOpenAiAssistant(message);
+    let openAiRun = {status: 'failed'};
 
     clearInterval(sendTypingInterval);
 
     if (openAiRun.status === 'completed') {
         const openAiMessages = await openai.beta.threads.messages.list(openAiRun.thread_id);
         const openAiReply = openAiMessages.data[0].content[0].text.value;
-        console.log(`${openAiReply.role} > ${openAiReply}`);
         await discordBotReply(message, openAiReply);
     } else if (openAiRun.status === 'failed') {
         const failedReply = `I didn't catch what you meant by "${message.content}"\n${ERROR_ANSWER}`;
-        console.log(`puff > ${failedReply}`);
-        discordBotReply(message, failedReply);
+        await discordBotReply(message, failedReply);
     } else {
         console.log(openAiRun.status);
     }
-
-    console.log(`DONE\n`);
     
 });
 //#endregion
