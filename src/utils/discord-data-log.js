@@ -14,19 +14,19 @@ export const getContentFromMessage = (message) => {
 //#endregion
 
 //#region THREADS LOGGING
-export const logAndSaveMessage = async (message) => {
+export const logAndSaveMessage = async (message, threadId = 0) => {
     if(message.type != 0) {
         return;
     }
-    await saveMessage(message);
-    logMessage(message);
+    await saveMessage(message, threadId);
+    logMessage(message, threadId);
 }
 
-const logMessage = (message) => {
-    console.log(`->  [channel #${message.channel.id} - ${message.createdTimestamp}] ${message.author.username}: "${getContentFromMessage(message)}"`);
+const logMessage = (message, threadId = 0) => {
+    console.log(`->  [channel #${threadId || message.channelId}] ${message.author.username}: "${getContentFromMessage(message)}"`);
 }
 
-const saveMessage = async (message) => {
+const saveMessage = async (message, threadId = 0) => {
     let jsonData;
     const messageData = {
         userId: message.author.id,
@@ -43,7 +43,7 @@ const saveMessage = async (message) => {
         jsonData.updatedTimestamp = messageData.createdTimestamp;
     } else {
         jsonData = {
-            threadId: message.id,
+            threadId: threadId,
             userId: messageData.userId,
             username: messageData.username,
             createdTimestamp: messageData.createdTimestamp,

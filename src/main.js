@@ -50,26 +50,20 @@ const discordBotReply = async (message, reply) => {
     const userMsg = getContentFromMessage(message);
 
     if(message.channel.isThread()) {
+        await logAndSaveMessage(message);
         await message.channel.send({ embeds: [discordMessageTemplate(reply)] });
     } else {
-        const thread = await message.startThread({
-            name: `${message.author?.globalName ?? message.author?.username}`,
+        const mainChannel = await client.channels.fetch(DISCORD_CHANNEL_IDS[0]);
+        const thread = await mainChannel.threads.create({
+            name: userMsg,
             autoArchiveDuration: 60,
             type: ChannelType.PrivateThread,
             reason: userMsg,
         });
-        // When creating a thread from message, the message id becomes the thread's channel id
-        DISCORD_CHANNEL_IDS.push(message.id);
+        await thread.members.add(message.author.id);
+        await logAndSaveMessage(message, thread.id);
 
-        // const mainChannel = await client.channels.fetch(DISCORD_CHANNEL_IDS[0]);
-        // const thread = await mainChannel.threads.create({
-        //     name: `${message.author?.globalName ?? message.author?.username}`,
-        //     autoArchiveDuration: 60,
-        //     type: ChannelType.PrivateThread,
-        //     reason: userMsg,
-        // });
-        // DISCORD_CHANNEL_IDS.push(thread.id);
-
+        DISCORD_CHANNEL_IDS.push(thread.id);
         await thread.send({ embeds: [discordMessageTemplate(reply)] });
     }
 }
@@ -112,15 +106,13 @@ client.on(Events.MessageCreate, async (message) => {
     // console.log(message);
     if (message.author.id == client.user.id) {
         // Bot receives its answer
-        logAndSaveMessage(message);
+        await logAndSaveMessage(message);
         return;
     }
 
     if (!DISCORD_CHANNEL_IDS.includes(message.channelId)) {
         return;
     }
-
-    logAndSaveMessage(message);
 
     await message.channel.sendTyping();
     const sendTypingInterval = setInterval(() => {
@@ -131,18 +123,19 @@ client.on(Events.MessageCreate, async (message) => {
     let openAiRun = await askOpenAiAssistant(message);
     // let openAiRun = {status: 'failed'};
 
-    clearInterval(sendTypingInterval);
-
     if (openAiRun.status === 'completed') {
         const openAiMessages = await openai.beta.threads.messages.list(openAiRun.thread_id);
-        const openAiReply = openAiMessages.data[0].content[0].text.value;
-        await discordBotReply(message, openAiReply);
+        const rawOpenAiReply = openAiMessages.data[0].content[0].text.value;
+        const cleanedOpenAiReply = rawOpenAiReply.replace(/【.*】/, "").trim();
+        await discordBotReply(message, cleanedOpenAiReply);
     } else if (openAiRun.status === 'failed') {
         const failedReply = `I didn't catch what you meant by "${message.content}"\n${ERROR_ANSWER}`;
         await discordBotReply(message, failedReply);
     } else {
         console.log(openAiRun.status);
     }
+
+    clearInterval(sendTypingInterval);
     
 });
 //#endregion
