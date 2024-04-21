@@ -1,7 +1,11 @@
 # AI DISCORD BOT
 
 ### To-do
-- Add threads that are less than 60 mins old to `DISCORD_CHANNEL_IDS` on bot ready (SHOULD NOT LOOP ON EVERY LOGGED THREADS!!!)
+- Only one thread per user
+
+### Improvments
+- Main bot channel should have instructions with a button to open a thread with discord bot
+- Link openAI thread with discord thread so the bot has chat history
 
 ### `thread.json` initial value:
 ```
