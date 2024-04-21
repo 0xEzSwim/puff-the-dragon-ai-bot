@@ -1,9 +1,15 @@
 # AI DISCORD BOT
 
-### To-do
+### To-do:
 - Only one thread per user
 
-### Improvments
+### UI ideas (We could submit the bot features to a community vote):
+- Bot Icon
+- Bot Name
+- Bot Personality
+- ...
+
+### Improvments:
 - Main bot channel should have instructions with a button to open a thread with discord bot
 - Link openAI thread with discord thread so the bot has chat history
 

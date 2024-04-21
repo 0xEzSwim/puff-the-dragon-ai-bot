@@ -44,7 +44,9 @@ const client = new Client({
 const discordMessageTemplate = (reply) => new EmbedBuilder()
 	.setColor(0xFFD700)
 	.setDescription(reply)
-	.setTimestamp();
+    .addFields(
+        { name: '\u200B\nOfficial Links', value: "[Website](https://puffthedragon.xyz) • [Puff's Penthouse](https://www.methlab.xyz/puffpenthouse)" }
+    );
 //#endregion
 const discordBotReply = async (message, reply) => {
     const userMsg = getContentFromMessage(message);
@@ -129,7 +131,7 @@ client.on(Events.MessageCreate, async (message) => {
         const cleanedOpenAiReply = rawOpenAiReply.replace(/【.*】/, "").trim();
         await discordBotReply(message, cleanedOpenAiReply);
     } else if (openAiRun.status === 'failed') {
-        const failedReply = `I didn't catch what you meant by "${message.content}"\n${ERROR_ANSWER}`;
+        const failedReply = `I didn't catch what you meant by "${message.content}"\n\n${ERROR_ANSWER}`;
         await discordBotReply(message, failedReply);
     } else {
         console.log(openAiRun.status);
