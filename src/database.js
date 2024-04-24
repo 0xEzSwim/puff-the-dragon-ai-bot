@@ -1,6 +1,5 @@
 import * as dotenv from "dotenv/config.js";
 import pg from "pg";
-import { isDataEmptyOrNull } from "./utils/index.js";
 
 export class Database {
     dbClient;
@@ -24,15 +23,19 @@ export class Database {
         Database.instance = this;
     }
 
+    isDataEmptyOrNull(data) {
+        return (!data?.length);
+    }
+
     async query(sql) {
         let result;
         try {
             result = await this.dbClient.query(sql);
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error(error);
         } 
 
-        const returnedValue = isDataEmptyOrNull(result?.rows) ? null : result?.rows;
+        const returnedValue = this.isDataEmptyOrNull(result?.rows) ? null : result?.rows;
         return returnedValue;
     }
 }

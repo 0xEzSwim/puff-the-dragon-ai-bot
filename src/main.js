@@ -1,5 +1,5 @@
 import { Events } from "discord.js";
-import {DiscordBotController} from "./controller/index.js";
+import { DiscordBotController } from "./controller/index.js";
 
 const main = () => {
     const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
@@ -8,7 +8,13 @@ const main = () => {
 
     //#region DISCORD EVENTS
     discord.once(Events.ClientReady, async () => {
+        await discordBotController.setupBot();
         console.log(`${discord.user} is now running`);
+    });
+
+    discord.on(Events.InteractionCreate, async (interaction) => {
+        console.log(interaction);
+        await discordBotController.openNewDiscordThread(interaction);
     });
 
     discord.on(Events.MessageCreate, async (message) => {

@@ -4,8 +4,7 @@ import {
 } from "../business/index.js";
 
 export class DiscordBotController {
-    ERROR_ANSWER = "I'm the super cool and helpful Discord assistant for the PUFF community, here to keep you updated and answering all your questions about our awesome meme coin 2.0 on the Mantle blockchain! Ready to blow some smoke and fire your way with answers! 🐉 Let's have some fun while we're at it! 💨🔥";
-
+    DEFAULT_MESSAGE = "I'm the super cool and helpful Discord assistant for the PUFF community, here to keep you updated and answering all your questions about our awesome meme coin 2.0 on the Mantle blockchain! Ready to blow some smoke and fire your way with answers! 🐉 Let's have some fun while we're at it! 💨🔥";
 
     discordBotBusiness;
     openAiAssistantBusiness;
@@ -22,14 +21,36 @@ export class DiscordBotController {
         DiscordBotController.instance = this;
     }
 
-    async getBotReply(message) {
-        if (message.author.id == this.discordBotBusiness.discordClient.user.id) {
-            // Bot receives its answer
-            await this.discordBotBusiness.logAndSaveMessage(message);
+    async setupBot() {
+        const mainChannel = await this.discordBotBusiness.discordClient.channels.fetch(this.discordBotBusiness.DISCORD_CHANNEL_ID);
+        if(!mainChannel) {
             return;
         }
 
-        if (!this.discordBotBusiness.DISCORD_CHANNEL_IDS.includes(message.channelId)) {
+        await this.discordBotBusiness.setupDiscordChannel(mainChannel, this.DEFAULT_MESSAGE);
+    }
+
+    async openNewDiscordThread(interaction) {
+        if (this.discordBotBusiness.DISCORD_CHANNEL_ID !== interaction.channelId) {
+            return;
+        }
+
+        if(!interaction.isButton()) {
+            return;
+        }
+
+        await this.discordBotBusiness.openNewDiscordThread(interaction);
+    }
+
+    async getBotReply(message) {
+        const activeThreads = await this.discordBotBusiness.getAllActiveThreads();
+        if (!activeThreads?.some(thread => (thread.discordThreadId === message.channelId))) {
+            return;
+        }
+
+        if (message.author.id == this.discordBotBusiness.discordClient.user.id) {
+            // Bot receives its answer
+            await this.discordBotBusiness.logAndSaveMessage(message);
             return;
         }
 
@@ -46,15 +67,14 @@ export class DiscordBotController {
             const openAiMessages = await this.OpenAiAssistantBusiness.openAiClient.beta.threads.messages.list(openAiRun.thread_id);
             const rawOpenAiReply = openAiMessages.data[0].content[0].text.value;
             const cleanedOpenAiReply = rawOpenAiReply.replace(/【.*】/, "").trim();
-            await this.discordBotBusiness.reply(message, cleanedOpenAiReply);
+            await this.discordBotBusiness.replyInDiscordThread(message, cleanedOpenAiReply);
         } else if (openAiRun.status === 'failed') {
-            const failedReply = `I didn't catch what you meant by "${message.content}"\n\n${this.ERROR_ANSWER}`;
-            await this.discordBotBusiness.reply(message, failedReply);
+            const failedReply = `I didn't catch what you meant by "${message.content}"\n\n${this.DEFAULT_MESSAGE}`;
+            await this.discordBotBusiness.replyInDiscordThread(message, failedReply);
         } else {
             console.log(openAiRun.status);
         }
 
         clearInterval(sendTypingInterval);
-
     }
 }

@@ -8,9 +8,9 @@ export class OpenAiAssistantBusiness {
     OPEN_AI_API_KEY = process.env.OPEN_AI_API_KEY;
     OPEN_AI_ASSISTANT_ID = process.env.OPEN_AI_ASSISTANT_ID;
     
-    openAiClient;
     discordBotBusiness;
     threadRepository;
+    openAiClient;
     instance;
 
     constructor() {
