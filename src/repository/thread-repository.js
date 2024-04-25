@@ -110,11 +110,13 @@ export class ThreadRepository {
         };
     }
 
-    async saveThread(userId, discordThreadId, openaiThreadId = null) {
+    async saveThread(userId, discordThreadId) {
         const dateNow = new Date();
         const threadQuery = {
-            text: `INSERT INTO public."thread"(discord_thread_id, openai_thread_id, user_id, created_timestamp, updated_timestamp) VALUES($1, $2, $3, $4, $5) RETURNING *;`,
-            values: [discordThreadId, openaiThreadId, userId, dateNow, null]
+            text: `INSERT INTO public."thread"(discord_thread_id, openai_thread_id, user_id, created_timestamp, updated_timestamp)
+                    VALUES($1, $2, $3, $4, $5)
+                    RETURNING *;`,
+            values: [discordThreadId, null, userId, dateNow, null]
         };
 
         const result = await this._db.query(threadQuery);
@@ -128,10 +130,14 @@ export class ThreadRepository {
         };
     }
 
-    async updateThread(discordThreadId) {
+    async updateThread(discordThreadId, openaiThreadId = null) {
         const dateNow = new Date();
         const threadQuery = {
-            text: `UPDATE public."thread" SET updated_timestamp = $1 WHERE discord_thread_id = $2 RETURNING *`,
+            text: `UPDATE   public."thread" 
+                    SET     updated_timestamp = $1
+                            ${ openaiThreadId ? `,openai_thread_id = '${openaiThreadId}'` : '' } 
+                    WHERE   discord_thread_id = $2 
+                    RETURNING *;`,
             values: [dateNow, discordThreadId]
         };
         

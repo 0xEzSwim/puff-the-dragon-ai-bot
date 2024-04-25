@@ -50,7 +50,7 @@ export class DiscordBotController {
 
         if (message.author.id == this.discordBotBusiness.discordClient.user.id) {
             // Bot receives its answer
-            await this.discordBotBusiness.logAndSaveMessage(message);
+            await this.discordBotBusiness.logAndSaveMessage(message, null);
             return;
         }
 
@@ -64,15 +64,15 @@ export class DiscordBotController {
         // let openAiRun = {status: 'failed'};
 
         if (openAiRun.status === 'completed') {
-            const openAiMessages = await this.OpenAiAssistantBusiness.openAiClient.beta.threads.messages.list(openAiRun.thread_id);
+            const openaiThreadId = openAiRun.thread_id;
+            const openAiMessages = await this.OpenAiAssistantBusiness.openAiClient.beta.threads.messages.list(openaiThreadId);
             const rawOpenAiReply = openAiMessages.data[0].content[0].text.value;
             const cleanedOpenAiReply = rawOpenAiReply.replace(/【.*】/, "").trim();
-            await this.discordBotBusiness.replyInDiscordThread(message, cleanedOpenAiReply);
+            await this.discordBotBusiness.replyInDiscordThread(message, cleanedOpenAiReply, openaiThreadId);
         } else if (openAiRun.status === 'failed') {
+            console.log(openAiRun.status);
             const failedReply = `I didn't catch what you meant by "${message.content}"\n\n${this.DEFAULT_MESSAGE}`;
             await this.discordBotBusiness.replyInDiscordThread(message, failedReply);
-        } else {
-            console.log(openAiRun.status);
         }
 
         clearInterval(sendTypingInterval);

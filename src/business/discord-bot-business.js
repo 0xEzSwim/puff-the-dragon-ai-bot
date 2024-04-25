@@ -146,9 +146,9 @@ export class DiscordBotBusiness {
     }
 
     //#region THREAD CRUD
-    async saveThread(interaction, discordThreadId, openaiThreadId = null) {
+    async saveThread(interaction, discordThreadId) {
         const user = await this.getOrCreateUser(interaction);
-        const thread = await this.threadRepository.saveThread(user.id, discordThreadId, openaiThreadId);
+        const thread = await this.threadRepository.saveThread(user.id, discordThreadId);
         
         return thread;
     }
@@ -170,13 +170,13 @@ export class DiscordBotBusiness {
     //#endregion
 
     //#region MESSAGE
-    async replyInDiscordThread(message, reply) {
+    async replyInDiscordThread(message, reply, openaiThreadId = null) {
         if(!message.channel.isThread()) {
             return;
         }
         
         // DB
-        await this.logAndSaveMessage(message);
+        await this.logAndSaveMessage(message, openaiThreadId);
 
         // Discord
         await message.channel.send({ embeds: [this.messageTemplate(reply)] });
@@ -191,11 +191,11 @@ export class DiscordBotBusiness {
         return this.isBotFromMessage(message) ? message.embeds[0].description : message.content;
     }
 
-    async logAndSaveMessage(message) {
+    async logAndSaveMessage(message, openaiThreadId) {
         if(message.type != 0) {
             return;
         }
-        await this.saveMessage(message);
+        await this.saveMessage(message, openaiThreadId);
         this.logMessage(message);
     }
 
@@ -216,9 +216,9 @@ export class DiscordBotBusiness {
     }
 
     //#region MESSAGE CRUD
-    async saveMessage(message) {
+    async saveMessage(message, openaiThreadId) {
         const user = await this.getOrCreateUser(message);
-        const thread = await this.threadRepository.updateThread(message.channelId);
+        const thread = await this.threadRepository.updateThread(message.channelId, openaiThreadId);
         const messageDb = await this.messageRepository.saveMessage(this.getContentFromMessage(message), user.id, thread.id);
         
         return messageDb;
