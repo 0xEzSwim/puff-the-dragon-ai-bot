@@ -80,6 +80,7 @@ export class DiscordBotController {
             return;
         }
 
+        await message.channel.setLocked(true);
         await message.channel.sendTyping();
         const sendTypingInterval = setInterval(() => {
             message.channel.sendTyping();
@@ -101,6 +102,7 @@ export class DiscordBotController {
             await this.discordBotBusiness.replyInDiscordThread(message, failedReply, questionQuota);
         }
 
+        await message.channel.setLocked(false);
         clearInterval(sendTypingInterval);
     }
 }
