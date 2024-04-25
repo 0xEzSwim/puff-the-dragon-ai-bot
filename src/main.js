@@ -13,7 +13,6 @@ const main = () => {
     });
 
     discord.on(Events.InteractionCreate, async (interaction) => {
-        console.log(interaction);
         await discordBotController.openNewDiscordThread(interaction);
     });
 

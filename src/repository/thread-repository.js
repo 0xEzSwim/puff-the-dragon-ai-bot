@@ -54,6 +54,45 @@ export class ThreadRepository {
         }));
     }
 
+    async getLastActiveThreadFromDiscordUserId(discordUserId) {
+        const dateCompare = new Date(Date.now() - this.DISCORD_CHANNEL_DURATION);
+        const threadQuery = {
+            text: `SELECT   
+                                thread.id,
+                                thread.discord_thread_id,
+                                thread.openai_thread_id,
+                                thread.user_id,
+                                member.discord_user_id,
+                                member.discord_username,
+                                thread.created_timestamp,
+                                thread.updated_timestamp
+                    FROM 		public."thread" AS thread
+                    INNER JOIN  public."user" AS member
+                        ON 		thread.user_id = member.id
+                    WHERE 		member.discord_user_id = $1
+                        AND 	(
+                                        thread.updated_timestamp IS null 
+                                    OR 	thread.updated_timestamp >= TIMESTAMP '${dateCompare.toISOString()}'
+                                )
+                    ORDER BY  	thread.created_timestamp DESC, 
+                                thread.updated_timestamp DESC
+                    LIMIT 1;`,
+            values: [discordUserId]
+        };
+
+        const result = await this._db.query(threadQuery);
+        return this._db.isDataEmptyOrNull(result) ? null : {
+            id: result[0].id,
+            discordThreadId: result[0].discord_thread_id,
+            openaiThreadId: result[0].openai_thread_id,
+            userId: result[0].user_id,
+            discordUserId: result[0].discord_user_id,
+            discordUsername: result[0].discord_username,
+            createdTimestamp: result[0].created_timestamp,
+            updatedTimestamp: result[0].updated_timestamp
+        };
+    }
+
     async getThreadFromDiscordThreadId(discordThreadId) {
         const threadQuery = {
             text: `SELECT * FROM public."thread" WHERE discord_thread_id = $1;`,

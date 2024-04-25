@@ -31,11 +31,11 @@ export class DiscordBotController {
     }
 
     async openNewDiscordThread(interaction) {
-        if (this.discordBotBusiness.DISCORD_CHANNEL_ID !== interaction.channelId) {
+        if (interaction.channelId !== this.discordBotBusiness.DISCORD_CHANNEL_ID) {
             return;
         }
 
-        if(!interaction.isButton()) {
+        if(!(interaction.isButton() && interaction.customId === this.discordBotBusiness.DISCORD_CHANNEL_ID)) {
             return;
         }
 

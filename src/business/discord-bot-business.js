@@ -116,11 +116,20 @@ export class DiscordBotBusiness {
 
     //#region THREAD
     async openNewDiscordThread(interaction) {
-        //Add check for only one thread by user
-
         const userInfo = this.getDiscordUserInfo(interaction);
-        // Discord
         const mainChannel = await this.discordClient.channels.fetch(this.DISCORD_CHANNEL_ID);
+
+        const discordThreadId = (await this.threadRepository.getLastActiveThreadFromDiscordUserId(userInfo.discordUserId)).discordThreadId;
+        if(discordThreadId) {
+            await interaction.reply({ 
+                embeds: [this.instructionMessageTemplate(`Oops! Looks like you've got the dragon's attention already!
+                Let’s keep our chat in the thread <#${discordThreadId}> you've opened so we can keep all the magic in one mystical place! 🔮🐉`)],
+                ephemeral: true
+                });
+            return;
+        }
+
+        // Discord
         const thread = await mainChannel.threads.create({
             name: userInfo.discordUsername,
             autoArchiveDuration: (this.DISCORD_CHANNEL_DURATION / 60000),
@@ -131,6 +140,7 @@ export class DiscordBotBusiness {
         await this.saveThread(interaction, thread.id);
 
         // Discord
+        interaction.deferUpdate();
         await thread.members.add(interaction.member.user.id);
         await thread.send({ embeds: [this.messageTemplate(this.CONVERSATION_STARTER)] });
     }
