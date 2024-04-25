@@ -42,9 +42,35 @@ export class DiscordBotController {
         await this.discordBotBusiness.openNewDiscordThread(interaction);
     }
 
+    async archiveDiscordThread(oldThread, newThread) {
+        if (newThread.parentId !== this.discordBotBusiness.DISCORD_CHANNEL_ID) {
+            return;
+        }
+
+        if(!(!oldThread.archived && newThread.archived)) {
+            return;
+        }
+
+        await this.discordBotBusiness.archiveThread(newThread);
+    }
+
+    async deleteDiscordThread(thread) {
+        if (thread.parentId !== this.discordBotBusiness.DISCORD_CHANNEL_ID) {
+            return;
+        }
+
+        await this.discordBotBusiness.deleteThread(thread);
+    }
+
     async getBotReply(message) {
         const activeThreads = await this.discordBotBusiness.getAllActiveThreads();
         if (!activeThreads?.some(thread => (thread.discordThreadId === message.channelId))) {
+            return;
+        }
+
+        const questionQuota = await this.discordBotBusiness.getCurrentQuestionQuota(message);
+        if (questionQuota >= this.discordBotBusiness.DISCORD_QUESTION_MAX) {
+            this.discordBotBusiness.sendReachedQuotaInDiscordThread(message, questionQuota);
             return;
         }
 
@@ -68,11 +94,11 @@ export class DiscordBotController {
             const openAiMessages = await this.OpenAiAssistantBusiness.openAiClient.beta.threads.messages.list(openaiThreadId);
             const rawOpenAiReply = openAiMessages.data[0].content[0].text.value;
             const cleanedOpenAiReply = rawOpenAiReply.replace(/【.*】/, "").trim();
-            await this.discordBotBusiness.replyInDiscordThread(message, cleanedOpenAiReply, openaiThreadId);
+            await this.discordBotBusiness.replyInDiscordThread(message, cleanedOpenAiReply, questionQuota, openaiThreadId);
         } else if (openAiRun.status === 'failed') {
             console.log(openAiRun.status);
             const failedReply = `I didn't catch what you meant by "${message.content}"\n\n${this.DEFAULT_MESSAGE}`;
-            await this.discordBotBusiness.replyInDiscordThread(message, failedReply);
+            await this.discordBotBusiness.replyInDiscordThread(message, failedReply, questionQuota);
         }
 
         clearInterval(sendTypingInterval);

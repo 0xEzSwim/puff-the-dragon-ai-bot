@@ -19,6 +19,23 @@ export class MessageRepository {
         }));
     }
 
+    async getMessagesQuotaFromDiscordThreadId(discordThreadId) {
+        const messageQuery = {
+            text: `SELECT      COUNT(*)
+                    FROM        public."message" AS msg
+                    INNER JOIN  public."thread" AS thread
+                        ON 		msg.thread_id  = thread.id
+                    INNER JOIN  public."user" AS member
+                        ON 		msg.user_id  = member.id 
+                    WHERE       thread.discord_thread_id = $1
+                        AND		member.is_bot = $2;`,
+            values: [discordThreadId, false]
+        };
+
+        const result = await this._db.query(messageQuery);
+        return this._db.isDataEmptyOrNull(result) ? null : +(result[0].count);
+    }
+
     async getMessagesFromThreadId(threadId) {
         const messageQuery = {
             text: `SELECT * FROM public."message" WHERE thread_id = $1;`,

@@ -15,6 +15,9 @@ export class ThreadRepository {
             discordThreadId: thread.discord_thread_id,
             openaiThreadId: thread.openai_thread_id,
             userId: thread.user_id,
+            isArchived: thread.is_archived,
+            isDeleted: thread.is_deleted,
+            hasReachedMaxQuota: thread.has_reached_max_quota,
             createdTimestamp: thread.created_timestamp,
             updatedTimestamp: thread.updated_timestamp
         }));
@@ -30,14 +33,19 @@ export class ThreadRepository {
                                 thread.user_id,
                                 member.discord_user_id,
                                 member.discord_username,
+                                thread.is_archived,
+                                thread.is_deleted,
+                                thread.has_reached_max_quota,
                                 thread.created_timestamp,
                                 thread.updated_timestamp
                     
                     FROM        public."thread" AS thread
                     INNER JOIN  public."user" AS member
                         ON      thread.user_id = member.id
-                    WHERE       thread.updated_timestamp IS NULL
-                        OR      thread.updated_timestamp >= TIMESTAMP '${dateCompare.toISOString()}';`,
+                    WHERE       thread.is_deleted = false
+                        AND     (
+                                    thread.updated_timestamp IS NULL
+                                    OR      thread.updated_timestamp >= TIMESTAMP '${dateCompare.toISOString()}');`,
             values: []
         };
 
@@ -49,6 +57,9 @@ export class ThreadRepository {
             userId: thread.user_id,
             discordUserId: thread.discord_user_id,
             discordUsername: thread.discord_username,
+            isArchived: thread.is_archived,
+            isDeleted: thread.is_deleted,
+            hasReachedMaxQuota: thread.has_reached_max_quota,
             createdTimestamp: thread.created_timestamp,
             updatedTimestamp: thread.updated_timestamp
         }));
@@ -64,12 +75,16 @@ export class ThreadRepository {
                                 thread.user_id,
                                 member.discord_user_id,
                                 member.discord_username,
+                                thread.is_archived,
+                                thread.is_deleted,
+                                thread.has_reached_max_quota,
                                 thread.created_timestamp,
                                 thread.updated_timestamp
                     FROM 		public."thread" AS thread
                     INNER JOIN  public."user" AS member
                         ON 		thread.user_id = member.id
                     WHERE 		member.discord_user_id = $1
+                        AND     thread.is_deleted = false
                         AND 	(
                                         thread.updated_timestamp IS null 
                                     OR 	thread.updated_timestamp >= TIMESTAMP '${dateCompare.toISOString()}'
@@ -88,6 +103,9 @@ export class ThreadRepository {
             userId: result[0].user_id,
             discordUserId: result[0].discord_user_id,
             discordUsername: result[0].discord_username,
+            isArchived: result[0].is_archived,
+            isDeleted: result[0].is_deleted,
+            hasReachedMaxQuota: result[0].has_reached_max_quota,
             createdTimestamp: result[0].created_timestamp,
             updatedTimestamp: result[0].updated_timestamp
         };
@@ -105,6 +123,9 @@ export class ThreadRepository {
             discordThreadId: result[0].discord_thread_id,
             openaiThreadId: result[0].openai_thread_id,
             userId: result[0].user_id,
+            isArchived: result[0].is_archived,
+            isDeleted: result[0].is_deleted,
+            hasReachedMaxQuota: result[0].has_reached_max_quota,
             createdTimestamp: result[0].created_timestamp,
             updatedTimestamp: result[0].updated_timestamp
         };
@@ -125,17 +146,23 @@ export class ThreadRepository {
             discordThreadId: result[0].discord_thread_id,
             openaiThreadId: result[0].openai_thread_id,
             userId: result[0].user_id,
+            isArchived: result[0].is_archived,
+            isDeleted: result[0].is_deleted,
+            hasReachedMaxQuota: result[0].has_reached_max_quota,
             createdTimestamp: result[0].created_timestamp,
             updatedTimestamp: result[0].updated_timestamp
         };
     }
 
-    async updateThread(discordThreadId, openaiThreadId = null) {
+    async updateThread(discordThreadId, openaiThreadId = null, isArchived = null, isDeleted = null, hasReachedMaxQuota = null) {
         const dateNow = new Date();
         const threadQuery = {
             text: `UPDATE   public."thread" 
                     SET     updated_timestamp = $1
-                            ${ openaiThreadId ? `,openai_thread_id = '${openaiThreadId}'` : '' } 
+                            ${ openaiThreadId ? `,openai_thread_id = '${openaiThreadId}'` : '' }
+                            ${ isArchived ? `,is_archived = '${isArchived}'` : '' }
+                            ${ isDeleted ? `,is_deleted = '${isDeleted}'` : '' }
+                            ${ hasReachedMaxQuota ? `,has_reached_max_quota = '${hasReachedMaxQuota}'` : '' }
                     WHERE   discord_thread_id = $2 
                     RETURNING *;`,
             values: [dateNow, discordThreadId]
@@ -147,6 +174,9 @@ export class ThreadRepository {
             discordThreadId: result[0].discord_thread_id,
             openaiThreadId: result[0].openai_thread_id,
             userId: result[0].user_id,
+            isArchived: result[0].is_archived,
+            isDeleted: result[0].is_deleted,
+            hasReachedMaxQuota: result[0].has_reached_max_quota,
             createdTimestamp: result[0].created_timestamp,
             updatedTimestamp: result[0].updated_timestamp
         };

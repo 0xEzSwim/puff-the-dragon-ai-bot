@@ -13,6 +13,7 @@ export class UserRepository {
             id: user.id,
             discordUserId: user.discord_user_id,
             discordUsername: user.discord_username,
+            isBot: user.is_bot,
             createdTimestamp: user.created_timestamp,
             updatedTimestamp: user.updated_timestamp
         }));
@@ -29,16 +30,17 @@ export class UserRepository {
             id: result[0].id,
             discordUserId: result[0].discord_user_id,
             discordUsername: result[0].discord_username,
+            isBot: result[0].is_bot,
             createdTimestamp: result[0].created_timestamp,
             updatedTimestamp: result[0].updated_timestamp
         };
     }
 
-    async saveUser(discordUserId, discordUsername) {      
+    async saveUser(userInfo) {      
         const dateNow = new Date();
         const userQuery = {
-            text: `INSERT INTO public."user"(discord_user_id, discord_username, created_timestamp, updated_timestamp) VALUES($1, $2, $3, $4) RETURNING *;`,
-            values: [discordUserId, discordUsername, dateNow, null]
+            text: `INSERT INTO public."user"(discord_user_id, discord_username, is_bot, created_timestamp, updated_timestamp) VALUES($1, $2, $3, $4, $5) RETURNING *;`,
+            values: [userInfo.discordUserId, userInfo.discordUsername, userInfo.isBot, dateNow, null]
         };
 
         const result = await this._db.query(userQuery);
@@ -46,6 +48,7 @@ export class UserRepository {
             id: result[0].id,
             discordUserId: result[0].discord_user_id,
             discordUsername: result[0].discord_username,
+            isBot: result[0].is_bot,
             createdTimestamp: result[0].created_timestamp,
             updatedTimestamp: result[0].updated_timestamp
         };
