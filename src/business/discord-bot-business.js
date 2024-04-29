@@ -19,6 +19,16 @@ export class DiscordBotBusiness {
     DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
     DISCORD_CHANNEL_DURATION = +process.env.DISCORD_CHANNEL_DURATION_IN_MS;
     DISCORD_QUESTION_MAX = +process.env.DISCORD_QUESTION_MAX;
+    INSTRUCTION_MANUAL = `# 🌬️ Welcome to **???** - The Magic Dragon - User Manual! 🐲
+
+## 🔥 Who I Am
+Hello and fiery greetings from the world of PUFF! You're not alone on this magical journey; I am **???**, your dedicated secret keeper and enchanted guide through the mystical realms of meme coin 2.0 magic on the Mantle blockchain. Eager to provide insights on PUFF, the next generation meme coin 2.0, I'm here to answer your questions about transactions, share details about your holdings, or explore other fiery topics together!
+
+## 🚀 How to Start Chatting
+Ready to dive into the mysteries of PUFF? Simply click the "Start Chatting 💬" button below this manual. It will open a private thread where we can converse directly—just you and **???**, discussing whatever you need to know about the PUFF universe.
+
+## 📜 Max Quota Per User
+As an adventurous explorer, you have the power to initiate up to **50 queries per thread**. Remember, each thread remains active until there's been an hour of inactivity. Make every query count!`;
     CONVERSATION_STARTER = `Hey there! 🐉 I'm your dedicated Discord assistant here to help light up your crypto journey with Mantle's coolest meme coin, PUFF! Whether you've got burning questions about our dragon lore, need help navigating the fiery depths of blockchain, or just want to shoot the breeze about all things PUFF, I'm here for it! Let's make some magic happen! 🔥❤️‍🔥🌬️`;
 
     userRepository;
@@ -55,7 +65,7 @@ export class DiscordBotBusiness {
     }
 
     //#region SETUP
-    async setupDiscordChannel(channel, instructionMessageContent) {
+    async setupDiscordChannel(channel) {
         // Resets channel messages
         let fetched;
         do {
@@ -73,7 +83,7 @@ export class DiscordBotBusiness {
             .setStyle(ButtonStyle.Primary)
         );
         await channel.send({ 
-            embeds: [this.instructionMessageTemplate(instructionMessageContent)],
+            embeds: [this.instructionMessageTemplate(this.INSTRUCTION_MANUAL)],
             components: [row] 
         });
     }

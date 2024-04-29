@@ -27,7 +27,7 @@ export class DiscordBotController {
             return;
         }
 
-        await this.discordBotBusiness.setupDiscordChannel(mainChannel, this.DEFAULT_MESSAGE);
+        await this.discordBotBusiness.setupDiscordChannel(mainChannel);
     }
 
     async openNewDiscordThread(interaction) {
