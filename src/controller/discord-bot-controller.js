@@ -26,9 +26,8 @@ export class DiscordBotController {
         if(!mainChannel) {
             return;
         }
-        await mainChannel.setLocked(false);
+
         await this.discordBotBusiness.setupDiscordChannel(mainChannel, this.DEFAULT_MESSAGE);
-        await mainChannel.setLocked(true);
     }
 
     async openNewDiscordThread(interaction) {
