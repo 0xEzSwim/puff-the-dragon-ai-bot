@@ -16,10 +16,6 @@ const main = () => {
         await discordBotController.openNewDiscordThread(interaction);
     });
 
-    discord.on(Events.ThreadUpdate, async (oldThread, newThread) => {
-        await discordBotController.archiveDiscordThread(oldThread, newThread);
-    });
-
     discord.on(Events.ThreadDelete, async (thread) => {
         await discordBotController.deleteDiscordThread(thread);
     });

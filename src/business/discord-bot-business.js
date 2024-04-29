@@ -171,12 +171,8 @@ export class DiscordBotBusiness {
         return activeThreads;
     }
 
-    async archiveThread(thread) {
-        return await this.threadRepository.updateThread(thread.id, null, true, null, null);
-    }
-
     async deleteThread(thread) {
-        return await this.threadRepository.updateThread(thread.id, null, null, true, null);
+        return await this.threadRepository.updateThread(thread.id, null, true, null);
     }
     //#endregion
     //#endregion
@@ -201,7 +197,7 @@ export class DiscordBotBusiness {
         }
 
         // DB
-        await this.threadRepository.updateThread(thread.discordThreadId, null, null, null, true);
+        await this.threadRepository.updateThread(thread.discordThreadId, null, null, true);
 
         // Discord
         const reply = `Whoa! You've reached your maximum questions quota (${this.DISCORD_QUESTION_MAX}), remember, pacing is key in the crypto world! It’s a great time to reflect on the info you've gathered, strategize your next moves, or simply enjoy the fiery ride. Don’t worry; I’ll be right here waiting to assist you with more blazing answers once you're ready to dive back in. Keep the fire alive and the dragons soaring! 🐉🔥`;
@@ -252,7 +248,7 @@ export class DiscordBotBusiness {
     //#region MESSAGE CRUD
     async saveMessage(message, openaiThreadId) {
         const user = await this.getOrCreateUser(message);
-        const thread = await this.threadRepository.updateThread(message.channelId, openaiThreadId, null, null, null);
+        const thread = await this.threadRepository.updateThread(message.channelId, openaiThreadId, null, null);
         const messageDb = await this.messageRepository.saveMessage(this.getContentFromMessage(message), user.id, thread.id);
         
         return messageDb;

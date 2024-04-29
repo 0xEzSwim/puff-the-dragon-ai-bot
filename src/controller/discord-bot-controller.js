@@ -26,8 +26,9 @@ export class DiscordBotController {
         if(!mainChannel) {
             return;
         }
-
+        await mainChannel.setLocked(false);
         await this.discordBotBusiness.setupDiscordChannel(mainChannel, this.DEFAULT_MESSAGE);
+        await mainChannel.setLocked(true);
     }
 
     async openNewDiscordThread(interaction) {
@@ -40,18 +41,6 @@ export class DiscordBotController {
         }
 
         await this.discordBotBusiness.openNewDiscordThread(interaction);
-    }
-
-    async archiveDiscordThread(oldThread, newThread) {
-        if (newThread.parentId !== this.discordBotBusiness.DISCORD_CHANNEL_ID) {
-            return;
-        }
-
-        if(!(!oldThread.archived && newThread.archived)) {
-            return;
-        }
-
-        await this.discordBotBusiness.archiveThread(newThread);
     }
 
     async deleteDiscordThread(thread) {
