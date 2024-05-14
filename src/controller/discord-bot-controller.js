@@ -58,7 +58,7 @@ export class DiscordBotController {
 
         const questionQuota = await this.discordBotBusiness.getCurrentQuestionQuota(message);
         if (questionQuota >= this.discordBotBusiness.DISCORD_QUESTION_MAX) {
-            this.discordBotBusiness.sendReachedQuotaInDiscordThread(message, questionQuota);
+            await this.discordBotBusiness.sendReachedQuotaInDiscordThread(message, questionQuota);
             return;
         }
 

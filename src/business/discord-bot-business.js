@@ -257,10 +257,10 @@ I’m here to zpread positivity and help with whatever's on your mind! Letzzz ig
         .addFields(
             { 
                 name: '\u200B\nOfficial Links', 
-                value: "[Website](https://puffthedragon.xyz) • [Puff's Penthouse](https://www.methlab.xyz/puffpenthouse)" 
+                value: "[Puff's Website](https://puffthedragon.xyz) • [Puff's Penthouse](https://www.methlab.xyz/puffpenthouse)" 
             }
         )
-        .setFooter({ text: `quota - ${questionQuota} / ${questionMax}` });
+        .setFooter({ text: `📜 Quota - ${ questionQuota >= questionMax ? 'REACHED MAX' : `${questionQuota} / ${questionMax}`}` });
     }
 
     //#region MESSAGE CRUD
