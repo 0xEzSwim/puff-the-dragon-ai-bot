@@ -29,7 +29,7 @@ Eager to provide insights on PUFF, he is here to answer your questions about tra
 Ready to dive into the mysteries of PUFF? Simply click the "Start Chatting 💬" button below this manual. It will open a private thread where we can converse directly—just you and **???**, discussing whatever you need to know about the PUFF universe. <:ourdragonlair:1224514145932673165> 🛡️ <a:DancingDragon:1225141508831969313> 🧠 <:Puff:1223683131887059076>
 
 ### 📜 Max Quota Per User
-As an adventurous explorer, you have the power to initiate up to **${this.DISCORD_QUESTION_MAX} queries per thread**. Remember, each thread remains active until there's been ${(this.DISCORD_CHANNEL_DURATION / 3.6e6)} hour(s) of inactivity. Make every query count, fren! 🦉 💡 <:Psy:1224514069885878282> 🐺 <:redpanda:1224514253999050802> <:CauldronofFortune:1233947719823790171> <:chessdecision:1224726099599294466> <:darkforest:1224514127423213609>
+As an adventurous explorer, you have the power to initiate up to **${this.DISCORD_QUESTION_MAX} queries per thread**. Remember, each thread remains active until there's been **${(this.DISCORD_CHANNEL_DURATION / 3.6e6 <= 1) ? `${this.DISCORD_CHANNEL_DURATION / 3.6e6} hour` : `${this.DISCORD_CHANNEL_DURATION / 3.6e6} hours`} of inactivity**. Make every query count, fren! 🦉 💡 <:Psy:1224514069885878282> 🐺 <:redpanda:1224514253999050802> <:CauldronofFortune:1233947719823790171> <:chessdecision:1224726099599294466> <:darkforest:1224514127423213609>
 
 Sing a Song of Fire, Lest we Fall Into the Dark! 🔥🎶 Letzzz ignite the flamez of our community—4EVER and beyond! ♾️ <:freewill:1224726139356844042> 🔮 🎲 👨🏻‍🚀 👩🏻‍🚀 🚀 🪐 🌌`;
     CONVERSATION_STARTER = `Hey there, amazing fren! 🐲✨
