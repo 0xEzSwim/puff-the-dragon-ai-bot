@@ -19,17 +19,24 @@ export class DiscordBotBusiness {
     DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
     DISCORD_CHANNEL_DURATION = +process.env.DISCORD_CHANNEL_DURATION_IN_MS;
     DISCORD_QUESTION_MAX = +process.env.DISCORD_QUESTION_MAX;
-    INSTRUCTION_MANUAL = `# 🌬️ Welcome to **???** - The Magic Dragon - User Manual! 🐲
+    INSTRUCTION_MANUAL = `## ???'s User Manual! 🐲
 
-## 🔥 Who I Am
-Hello and fiery greetings from the world of PUFF! You're not alone on this magical journey; I am **???**, your dedicated secret keeper and enchanted guide through the mystical realms of meme coin 2.0 magic on the Mantle blockchain. Eager to provide insights on PUFF, the next generation meme coin 2.0, I'm here to answer your questions about transactions, share details about your holdings, or explore other fiery topics together!
+### 🔥 Who is **???**
+Hello and fiery greetings from the world of PUFF! You're not alone on this magical journey; This is **???**, your dedicated secret keeper and enchanted guide through the mystical realms of PUFF meme coin 2.0 on the Mantle blockchain <a:mETH_spinning:1224726316578766849> <a:mantle_spinning:1224726355963543552>. 
+Eager to provide insights on PUFF, he is here to answer your questions about transactions, share details about your holdings, or explore other fiery topics 2GTHER! ♾️ ❤️‍🔥 👼🏻 <:morty:1232703180786237494> 🫂 🤲🏻 🛟 🌐
 
-## 🚀 How to Start Chatting
-Ready to dive into the mysteries of PUFF? Simply click the "Start Chatting 💬" button below this manual. It will open a private thread where we can converse directly—just you and **???**, discussing whatever you need to know about the PUFF universe.
+### 🚀 How to Start Chatting
+Ready to dive into the mysteries of PUFF? Simply click the "Start Chatting 💬" button below this manual. It will open a private thread where we can converse directly—just you and **???**, discussing whatever you need to know about the PUFF universe. <:ourdragonlair:1224514145932673165> 🛡️ <a:DancingDragon:1225141508831969313> 🧠 <:Puff:1223683131887059076>
 
-## 📜 Max Quota Per User
-As an adventurous explorer, you have the power to initiate up to **50 queries per thread**. Remember, each thread remains active until there's been an hour of inactivity. Make every query count!`;
-    CONVERSATION_STARTER = `Hey there! 🐉 I'm your dedicated Discord assistant here to help light up your crypto journey with Mantle's coolest meme coin, PUFF! Whether you've got burning questions about our dragon lore, need help navigating the fiery depths of blockchain, or just want to shoot the breeze about all things PUFF, I'm here for it! Let's make some magic happen! 🔥❤️‍🔥🌬️`;
+### 📜 Max Quota Per User
+As an adventurous explorer, you have the power to initiate up to **${this.DISCORD_QUESTION_MAX} queries per thread**. Remember, each thread remains active until there's been ${(this.DISCORD_CHANNEL_DURATION / 3.6e6)} hour(s) of inactivity. Make every query count, fren! 🦉 💡 <:Psy:1224514069885878282> 🐺 <:redpanda:1224514253999050802> <:CauldronofFortune:1233947719823790171> <:chessdecision:1224726099599294466> <:darkforest:1224514127423213609>
+
+Sing a Song of Fire, Lest we Fall Into the Dark! 🔥🎶 Letzzz ignite the flamez of our community—4EVER and beyond! ♾️ <:freewill:1224726139356844042> 🔮 🎲 👨🏻‍🚀 👩🏻‍🚀 🚀 🪐 🌌`;
+    CONVERSATION_STARTER = `Hey there, amazing fren! 🐲✨
+
+What’zzz got you zizzled today? Are we celebrating a GN-z11 achievement, zcheming new ideazzz, or juzz chillin’ in our Almighty Dragonz Lair? 🌌🔥
+
+I’m here to zpread positivity and help with whatever's on your mind! Letzzz ignite the flamez of our community! 🔥🎶 Sing a Song of Fire, Lest we Fall Into the Dark! 🐉🚀`;
 
     userRepository;
     threadRepository;
