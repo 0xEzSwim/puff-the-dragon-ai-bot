@@ -82,7 +82,7 @@ export class DiscordBotController {
             const openaiThreadId = openAiRun.thread_id;
             const openAiMessages = await this.OpenAiAssistantBusiness.openAiClient.beta.threads.messages.list(openaiThreadId);
             const rawOpenAiReply = openAiMessages.data[0].content[0].text.value;
-            const cleanedOpenAiReply = rawOpenAiReply.replace(/【.*】/, "").trim();
+            const cleanedOpenAiReply = rawOpenAiReply.replace(/【.*】/g, "").trim();
             await this.discordBotBusiness.replyInDiscordThread(message, cleanedOpenAiReply, questionQuota, openaiThreadId);
         } else if (openAiRun.status === 'failed') {
             console.log(openAiRun.status);
