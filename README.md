@@ -1,4 +1,4 @@
-# AI DISCORD BOT
+# Puff The Dragon discord bot
 
 This project is an AI bot for Puff The Dragon discord server. 
 
@@ -11,7 +11,18 @@ The objective of the bot is to offer on demande and personal Q&A to discord memb
 ```cmd
 npm install
 ```
-3. Start the bot:
+3. Add .env file:
+```javascript
+DATABASE_URL = ""
+DISCORD_BOT_TOKEN = ""
+DISCORD_CHANNEL_DURATION_IN_MS = ""
+DISCORD_CHANNEL_ID = ""
+DISCORD_QUESTION_MAX = ""
+OPEN_AI_API_KEY = ""
+OPEN_AI_ASSISTANT_ID = ""
+OPEN_AI_ORGANIZATION_ID = ""
+```
+5. Start the bot:
 ```cmd
 npm run start
 ```
