@@ -1,1 +1,1 @@
-Worker: npm run start
+Discord bot: npm run start
