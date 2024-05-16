@@ -1,1 +1,1 @@
-Discord bot: npm run start
+discord-bot: npm run start
