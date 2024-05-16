@@ -1,7 +1,8 @@
 # AI DISCORD BOT
 
-### What is it
-This project is an AI assistant for discord servers.
+This project is an AI bot for Puff The Dragon discord server. 
+
+The objective of the bot is to offer on demande and personal Q&A to discord members in private threads.
 
 ### Getting started
 1. Clone repository
@@ -23,4 +24,7 @@ Backend => Node.js, OpenAI
 Database => PostgreSQL
 
 ### DB Model
-![discord bot database model](discord-bot-model.png)
+![discord bot database model](assets/discord-bot-model.png)
+
+### Question and answer example
+![discord bot database model](assets/thread-example.png)
