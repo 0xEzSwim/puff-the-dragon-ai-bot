@@ -235,19 +235,19 @@ I’m here to zpread positivity and help with whatever's on your mind! Letzzz ig
     }
 
     getContentFromMessage(message) {
-        return this.isBotFromMessage(message) ? message.embeds[0].description : message.content;
+        return this.isBotFromMessage(message) ? message.embeds[0].description : `${message.content.split('?')[0]} ?`;
     }
 
     async logAndSaveMessage(message, openaiThreadId) {
         if(message.type != 0) {
             return;
         }
-        await this.saveMessage(message, openaiThreadId);
-        this.logMessage(message);
+        const messageDb = await this.saveMessage(message, openaiThreadId);
+        this.logMessage(message.channelId, message.author.username, messageDb.messageContent);
     }
 
-    logMessage(message) {
-        console.log(`->  [channel #${message.channelId}] ${message.author.username}: "${this.getContentFromMessage(message)}"`);
+    logMessage(channelId, username, message) {
+        console.log(`->  [channel #${channelId}] ${username}: "${message}"`);
     }
 
     messageTemplate(messageContent, questionQuota, questionMax) {
