@@ -235,9 +235,7 @@ I’m here to zpread positivity and help with whatever's on your mind! Letzzz ig
     }
 
     getContentFromMessage(message) {
-        const userMessage = this.isBotFromMessage(message) ? message.embeds[0].description : message.content;
-        const questions = userMessage.split('?');
-        return `${questions[0]} ?`;
+        return this.isBotFromMessage(message) ? message.embeds[0].description : `${message.content.split('?')[0]} ?`;
     }
 
     async logAndSaveMessage(message, openaiThreadId) {
