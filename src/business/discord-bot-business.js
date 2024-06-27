@@ -19,14 +19,15 @@ export class DiscordBotBusiness {
     DISCORD_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
     DISCORD_CHANNEL_DURATION = +process.env.DISCORD_CHANNEL_DURATION_IN_MS;
     DISCORD_QUESTION_MAX = +process.env.DISCORD_QUESTION_MAX;
-    INSTRUCTION_MANUAL = `## ???'s User Manual! 🐲
+    INSTRUCTION_MANUAL = `## How to use the AI egg 🥚
 
-### 🔥 Who is **???**
-Hello and fiery greetings from the world of PUFF! You're not alone on this magical journey; This is **???**, your dedicated secret keeper and enchanted guide through the mystical realms of PUFF meme coin 2.0 on the Mantle blockchain <a:mETH_spinning:1224726316578766849> <a:mantle_spinning:1224726355963543552>. 
+### 🔥 Who is **AI egg**
+Hello and fiery greetings from the world of PUFF! You're not alone on this magical journey; I am the **AI egg**, your dedicated enchanted guide through the mystical realms of PUFF meme coin 2.0 on the Mantle blockchain <a:mETH_spinning:1224726316578766849> <a:mantle_spinning:1224726355963543552>. 
 Eager to provide insights on PUFF, he is here to answer your questions about transactions, share details about your holdings, or explore other fiery topics 2GTHER! ♾️ ❤️‍🔥 <:morty:1232703180786237494> 🫂 🤲🏻
 
 ### 🚀 How to Start Chatting
-Ready to dive into the mysteries of PUFF? Simply click the "Start Chatting 💬" button below this manual. It will open a private thread where we can converse directly—just you and **???**, discussing whatever you need to know about the PUFF universe. <:ourdragonlair:1224514145932673165> 🛡️ <a:DancingDragon:1225141508831969313> 🧠 <:Puff:1223683131887059076>
+Ready to dive into the mysteries of PUFF? 
+Simply click the \`Start Chatting 💬\` button below this manual. It will open a private thread where we can converse directly—just you and I, discussing whatever you need to know about the PUFF universe. <:ourdragonlair:1224514145932673165> 🛡️ <a:DancingDragon:1225141508831969313> 🧠 <:Puff:1223683131887059076>
 
 ### 📜 Max Quota Per User
 As an adventurous explorer, you have the power to initiate up to **${this.DISCORD_QUESTION_MAX} queries per thread**. Remember, each thread remains active until there's been **${(this.DISCORD_CHANNEL_DURATION / 3.6e6 <= 1) ? `${this.DISCORD_CHANNEL_DURATION / 3.6e6} hour` : `${this.DISCORD_CHANNEL_DURATION / 3.6e6} hours`} of inactivity**. 
