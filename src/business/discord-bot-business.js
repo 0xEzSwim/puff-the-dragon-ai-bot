@@ -235,8 +235,8 @@ I’m here to zpread positivity and help with whatever's on your mind! Letzzz ig
     }
 
     getContentFromMessage(message) {
-        const message = this.isBotFromMessage(message) ? message.embeds[0].description : message.content;
-        const questions = message.split('?');
+        const userMessage = this.isBotFromMessage(message) ? message.embeds[0].description : message.content;
+        const questions = userMessage.split('?');
         return `${questions[0]} ?`;
     }
 
